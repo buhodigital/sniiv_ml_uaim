@@ -1,0 +1,181 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<title>UAIM DSC</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<style>
+body,h1 {font-family: "Raleway", sans-serif}
+body, html {height: 100%}
+.bgimg {
+    background-image: url('{% static "assets/ciudad-abstracta.webp" %}');
+    min-height: 100%;
+    background-position: center;
+    background-size: cover;
+}
+body{
+    min-height: 600px;
+}
+</style>
+</head>
+<body>
+<div class="bgimg w3-display-container w3-text-white">
+<div class="w3-display-topright w3-padding-large">
+    <a href="/" class="w3-button w3-white w3-border w3-border-white w3-round-large">Inicio</a>
+</div>
+<div class="w3-display-topleft w3-padding-large w3-xlarge">
+    Estimar valor de viviendas en México 
+</div>
+<div class="w3-display-middle w3-card-4 w3-padding-large w3-light-grey" >
+    <form action="/result/" method="post" class="w3-container">
+        {% csrf_token %}
+        <label for="año">Año:</label>
+        <select class="w3-select" id="año" name="ano" required>
+            <option value="" disabled selected>Seleccione el año</option>
+            {% for year in years %}
+            <option value="{{ year }}">{{ year }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="cve_ent">Clave Entidad:</label>
+        <select class="w3-select" id="cve_ent" name="cve_ent" required onchange="updateMunicipios()">
+            <option value="" disabled selected>Seleccione la clave entidad</option>
+            {% for item in cve_ent_nom_ent_list %}
+            <option value="{{ item.CVE_ENT }}">{{ item.NOM_ENT }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="cve_mun">Clave Municipio:</label>
+        <select class="w3-select" id="cve_mun" name="cve_mun" required>
+            <option value="" disabled selected>Seleccione la clave municipio</option>
+            {% for item in municipios %}
+            <option value="{{ item.CVE_MUN }}" data-cve-ent="{{ item.CVE_ENT }}">{{ item.NOM_MUN }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="modalidad">Modalidad:</label>
+        <select class="w3-select" id="modalidad" name="modalidad" required>
+            <option value="" disabled selected>Seleccione la modalidad</option>
+            <option value="1">Vivienda nueva</option>
+            <option value="3">Vivienda usada</option>
+        </select>
+        
+        <label for="ingresos_rango">Rango de Ingresos de la Zona:</label>
+        <select class="w3-select" id="ingresos_rango" name="ingresos_rango" required>
+            <option value="" disabled selected>Seleccione el rango de ingresos</option>
+            <option value="1">Mínimo</option><!--2.6 o menos-->-->
+            <option value="2">Bajo</option><!-- 2.61 a 4.00 -->-->
+            <option value="3">Medio bajo</option><!-- 4.01 a 6.00 -->
+            <option value="4">Medio</option><!-- 6.01 a 9.00 -->
+            <option value="5">Medio Alto</option><!-- 9.01 a 12.00 -->
+            <option value="6">Alto</option><!-- Más de 12.00 -->
+        </select>
+        
+        <label for="vivienda_valor">Características de la Vivienda:</label>
+        <select class="w3-select" id="vivienda_valor" name="vivienda_valor" required>
+            <option value="" disabled selected>Seleccione el valor de vivienda</option>
+            <option value="1">Económica <small>(Hasta 40 m2)</small></option>
+            <option value="2">Popular <small>(Hasta 50 m2)</small></option>
+            <option value="3">Tradicional <small>(Hasta 71 m2)</small> </option>
+            <option value="4">Media <small>(Hasta 102 m2)</small> </option>
+            <option value="5">Residencial <small>(Hasta 156 m2)</small> </option>
+            <option value="6">Residencial Plus <small>(Más de 156 m2)</small> </option>
+        </select>     
+        <label for="">&nbsp;</label> <br>
+        <input class="w3-button w3-blue" type="submit" value="Evaluar">
+    </form>
+    <div class="w3-container"> 
+        <label for="">&nbsp;</label> <br>
+        <!-- Trigger/Open The Modal Vivienda-->
+        <button onclick="document.getElementById('infoModal').style.display='block'" class="w3-button w3-left"> <small>Ver clasificación de vivienda</small></button>
+        <!-- Trigger/Open The Modal UMAS -->
+        <button onclick="document.getElementById('infoModalUmas').style.display='block'" class="w3-button w3-left"> <small>Ver Rango de ingresos</small></button>
+        <a href="https://sniiv.sedatu.gob.mx/Reporte/Datos_abiertos" target="_blank" class="w3-button w3-left"> <small>Datos abiertos SNIIV</small></a>
+    </div>
+</div>
+
+
+
+<div class="w3-display-bottomleft w3-padding-large">
+    UAIM | Doctorado en Sistemas Computacionales
+</div>
+
+</div>
+
+<!-- The Modal Vivienda-->
+<div id="infoModal" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4">
+        <header class="w3-container w3-light-blue"> 
+            <span onclick="document.getElementById('infoModal').style.display='none'" 
+            class="w3-button w3-display-topright">&times;</span>
+            <h2>Clasificación de valor de vivienda</h2>
+        </header>
+        <div class="w3-container">
+            <p>
+                ***Económica: Superficie construida en promedio: 40m2, costo promedio: 118 UMAs cuentan con 1 baño, cocina, área de usos múltiples. <br>
+                ***Popular: Superficie construida en promedio: 50m2, costo promedio: de 118.1 a 200 UMAs cuentan con 1 baño, cocina, estancia, comedor, de 1 a 2 recámaras y 1 cajón de estacionamiento. <br>
+                ***Tradicional: Superficie construida en promedio: 71m2, costo promedio: de 200.1 a 350 UMAs cuentan con 1 y ½ baños, cocina, estancia-comedor, de 2 a 3 recámaras, 1 cajón de estacionamiento. <br>
+                ***Media: Superficie construida en promedio: 102m2, costo promedio: de 350.1 a 750 UMAs cuentan con 2 baños, cocina, sala, comedor, de 2 a 3 recámaras, cuarto de servicio y 1 a 2 cajones de estacionamiento. <br>
+                ***Residencial: Superficie construida en promedio: 156m2, costo promedio: de 750.1 a 1,500 UMAs cuentan con 3 a 4 baños, cocina, sala, comedor, de 3 a 4 recámaras, cuarto de servicio, sala familiar y 2 o 3 cajones de estacionamiento. <br>
+                ***Residencial plus: Superficie construida en promedio: más de 156m2, costo promedio: más de 750.1 a 1,500 UMAs cuentan con más de 4 años, cocina, sala, comedor, más de 4 recámaras, cuarto de servicio, sala familiar y más de 3 cajones de estacionamiento.
+            </p>
+        </div>
+        <footer class="w3-container w3-light-blue">
+            <button onclick="document.getElementById('infoModal').style.display='none'" class="w3-button w3-white w3-margin-top">Cerrar</button> 
+            <div>&nbsp;</div>
+        </footer>
+    </div>
+</div>
+
+<!-- The Modal UMAS-->
+<div id="infoModalUmas" class="w3-modal">
+    <div class="w3-modal-content w3-animate-top w3-card-4">
+        <header class="w3-container w3-light-blue"> 
+            <span onclick="document.getElementById('infoModalUmas').style.display='none'" 
+            class="w3-button w3-display-topright">&times;</span>
+            <h2>Rangos de ingresos mensuales</h2>
+        </header>
+        <div class="w3-container">
+            <p>
+                ***Mínimo: Hasta 2.6 UMAs <br>
+                ***Bajo: De 2.61 a 4.00 UMAs <br>
+                ***Medio bajo: De 4.01 a 6.00 UMAs <br>
+                ***Medio: De 6.01 a 9.00 UMAs <br>
+                ***Medio alto: De 9.01 a 12.00 UMAs <br>
+                ***Alto: Más de 12.00 UMAs
+            </p>
+            <a href="https://www.inegi.org.mx/temas/uma/" target="_blank">Ver tabla de UMAs (INEGI)</a>
+        </div>
+        <footer class="w3-container w3-light-blue">
+            <button onclick="document.getElementById('infoModalUmas').style.display='none'" class="w3-button w3-white w3-margin-top">Cerrar</button> 
+            <div>&nbsp;</div>
+        </footer>
+    </div>
+</div>
+
+<script>
+function updateMunicipios() {
+    var cveEntSelect = document.getElementById("cve_ent");
+    var cveMunSelect = document.getElementById("cve_mun");
+    var selectedCveEnt = cveEntSelect.value;
+
+    // Limpiar las opciones actuales del select de municipios
+    cveMunSelect.innerHTML = '<option value="" disabled selected>Seleccione la clave municipio</option>';
+
+    // Agregar las opciones filtradas
+    {% for item in municipios %}
+    if ("{{ item.CVE_ENT }}" === selectedCveEnt) {
+        var option = document.createElement("option");
+        option.value = "{{ item.CVE_MUN }}";
+        option.text = "{{ item.NOM_MUN }}";
+        cveMunSelect.appendChild(option);
+    }
+    {% endfor %}
+}
+</script>
+
+</body>
+</html>
