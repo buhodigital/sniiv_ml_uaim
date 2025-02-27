@@ -4,6 +4,7 @@ Predicción del valor de propiedades en México empleando modelos de aprendizaje
 Imágen de docker -> https://hub.docker.com/r/feguson/sniivprototipo1
 
 #Primera versión
+
    docker pull feguson/sniivprototipo1:1.3
 
 Prototipo funcional -> https://goldfish-app-x6g4x.ondigitalocean.app/
