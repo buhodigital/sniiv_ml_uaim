@@ -5,7 +5,7 @@ Imágen de docker -> https://hub.docker.com/r/feguson/sniivprototipo
 
 #Primera versión
 
-   docker pull feguson/sniivprototipo1:1.3
+   docker pull feguson/sniivprototipo:1.4
 
 Recomendación de configuración de Ports: 8080:8000/tcp
 
