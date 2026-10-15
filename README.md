@@ -9,3 +9,6 @@ Imágen de docker -> https://hub.docker.com/r/feguson/sniivprototipo
 
 Recomendación de configuración de Ports: 8080:8000/tcp
 
+Modelo reentrenado el 31 de agosto de 2026
+Actualización -> https://github.com/buhodigital/Estimaci-n-vivienda-modelos-AA
+
